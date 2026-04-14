@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORDEN DE SERVICIOS - TRANSPORTATION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        
+        .input-field { 
+            border: 2px solid #e2e8f0; 
+            border-radius: 1.25rem; 
+            padding: 1.25rem; 
+            font-weight: 700; 
+            width: 100%; 
+            background: #fff; 
+            font-size: 1.1rem; 
+            color: #0f172a; 
+            transition: all 0.2s ease;
+        }
+        .input-field:focus { 
+            border-color: #0ea5e9; 
+            outline: none; 
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+            background-color: #f0f9ff;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        label { font-size: 0.85rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 0.25rem; display: block; }
+        .btn-primary { background-color: #0f172a; color: white; font-weight: 900; padding: 1.5rem; border-radius: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.1rem; transition: all 0.2s; cursor: pointer; width: 100%; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Estilos especificos para el Voucher PDF */
+        #voucher-printable { 
+            background: white !important; 
+            width: 210mm; 
+            padding: 20mm;
+            color: #0f172a;
+        }
+        .voucher-header { border-bottom: 4px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px; }
+        .policy-text { font-size: 9px; line-height: 1.4; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 30px; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .data-box { border: 1px solid #f1f5f9; padding: 15px; border-radius: 12px; background: #f8fafc; }
+        .stamp { border: 3px solid #10b981; color: #10b981; padding: 10px; border-radius: 8px; transform: rotate(-15deg); font-weight: 900; text-transform: uppercase; display: inline-block; font-size: 14px; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <header class="bg-white border-b border-slate-100 p-4 sticky top-0 z-50">
+        <div class="max-w-xl mx-auto flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white font-black text-xl">T</div>
+                    <span class="font-black text-slate-800 uppercase text-sm tracking-tight">TRANSPORTATION</span>
+                </div>
+            </div>
+            <div class="flex bg-slate-100 p-1.5 rounded-2xl">
+                <button id="tab-btn-user" onclick="switchTab('user')" class="flex-1 py-3 rounded-xl font-black text-xs uppercase bg-sky-600 text-white shadow-lg">USUARIO</button>
+                <button id="tab-btn-admin" onclick="switchTab('admin')" class="flex-1 py-3 rounded-xl font-black text-xs uppercase text-slate-400">GERENCIA</button>
+            </div>
+        </div>
+    </header>
+
+    <main id="view-user" class="max-w-2xl mx-auto mt-8 px-4">
+        <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden">
+            <div id="form-container">
+                <div class="bg-slate-900 p-8 text-center text-white">
+                    <h1 class="font-black uppercase text-2xl tracking-widest">TRANSPORTATION</h1>
+                    <p class="text-sky-400 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">Professional Service and Logistics</p>
+                </div>
+                <form id="transportForm" class="p-8 space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label>Empresa Solicitante</label><input type="text" name="empresa" required class="input-field" placeholder="Agencia"></div>
+                        <div><label>Pasajero Principal</label><input type="text" name="nombre" required class="input-field" placeholder="Nombre completo"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div><label>Num Personas</label><input type="number" name="pax" required class="input-field" placeholder="0"></div>
+                        <div><label>Num Vuelo</label><input type="text" name="vuelo" class="input-field uppercase" placeholder="Ej: AM123"></div>
+                        <div><label>Unidad</label><select name="tipo_unidad" class="input-field"><option>Van</option><option>Sedan</option><option>SUV</option><option>Sprinter</option><option>Autobus</option></select></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label>Fecha y Hora</label><input type="datetime-local" id="input-fecha" name="fecha" required class="input-field"></div>
+                        <div><label>Color Vehiculo</label><input type="text" name="color_unidad" required class="input-field uppercase" placeholder="Blanco"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label>Punto de Origen</label><input type="text" name="origen" required class="input-field uppercase" placeholder="Aeropuerto"></div>
+                        <div><label>Punto de Destino</label><input type="text" name="destino" required class="input-field uppercase" placeholder="Hotel"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label>Operador / Chofer</label><input type="text" name="conductor" required class="input-field" placeholder="Nombre conductor"></div>
+                        <div><label>Placas</label><input type="text" name="placas" required class="input-field uppercase" placeholder="00-AAA-00"></div>
+                    </div>
+
+                    <div><label>Peticion Especial</label><textarea name="peticion" class="input-field h-24" placeholder="Ej: Silla para bebe, agua extra, etc."></textarea></div>
+
+                    <div>
+                        <label>Importe Total del Servicio ($)</label>
+                        <input type="number" step="0.01" name="balance" required class="input-field text-3xl font-black text-sky-600 text-center" onwheel="this.blur()" placeholder="0.00">
+                    </div>
+                    <button type="submit" class="btn-primary">Pagar y Solicitar Autorizacion</button>
+                </form>
+            </div>
+
+            <div id="waiting-panel" class="hidden py-32 px-10 text-center">
+                <div class="w-16 h-16 border-[6px] border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-8"></div>
+                <h2 class="font-black text-2xl text-slate-800 uppercase">Procesando Solicitud</h2>
+                <p class="text-slate-400 text-xs font-bold mt-2">Folio de Rastreo: <span id="wait-order-id" class="text-sky-600"></span></p>
+                <div class="mt-8 bg-sky-600 p-8 rounded-[2rem] border-4 border-sky-100 shadow-xl">
+                    <p class="text-white text-lg leading-tight font-black uppercase italic">
+                        REALIZA EL PAGO EN MERCADO PAGO Y ESPERA AUTORIZACION.
+                    </p>
+                </div>
+            </div>
+
+            <div id="success-panel" class="hidden p-4 bg-slate-50 min-h-screen">
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <button onclick="descargarPDF()" class="bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg">Descargar PDF</button>
+                    <button onclick="compartirWhatsApp()" class="bg-emerald-500 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg">WhatsApp</button>
+                    <button onclick="nuevaOrden()" class="bg-sky-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg">Nueva Orden</button>
+                </div>
+                
+                <!-- VOUCHER TIPO AGENCIA EXPERTA -->
+                <div id="voucher-printable">
+                    <div class="voucher-header flex justify-between items-end">
+                        <div>
+                            <h2 class="font-black text-3xl uppercase tracking-tighter">CONFIRMACION DE SERVICIO</h2>
+                            <p class="text-sky-600 font-bold text-xs uppercase tracking-widest">Transportation Global Logistics</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="stamp">Validado</span>
+                            <p class="text-[10px] font-bold text-slate-400 mt-2 uppercase">ID Confirmacion</p>
+                            <p id="v-folio" class="text-xl font-black leading-none"></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="data-grid">
+                            <div class="data-box">
+                                <label>Pasajero y Grupo</label>
+                                <p id="v-nombre" class="font-black text-lg uppercase"></p>
+                                <p id="v-pax-val" class="text-xs font-bold text-slate-600 uppercase"></p>
+                                <p id="v-empresa-val" class="text-[10px] font-bold text-slate-400 uppercase mt-1"></p>
+                            </div>
+                            <div class="data-box border-l-4 border-sky-500">
+                                <label>Logistica de Vuelo</label>
+                                <p id="v-vuelo-val" class="font-black text-lg uppercase"></p>
+                                <p id="v-fecha" class="text-xs font-bold text-slate-600"></p>
+                            </div>
+                        </div>
+
+                        <div class="data-box bg-slate-900 !text-white">
+                            <label class="!text-slate-400">Itinerario de Ruta</label>
+                            <div class="flex items-center gap-4 mt-2">
+                                <div class="flex-1">
+                                    <span class="text-[10px] uppercase font-bold opacity-70">Origen</span>
+                                    <p id="v-origen-text" class="font-black text-lg uppercase"></p>
+                                </div>
+                                <div class="text-sky-400 font-black text-2xl">--</div>
+                                <div class="flex-1">
+                                    <span class="text-[10px] uppercase font-bold opacity-70">Destino</span>
+                                    <p id="v-destino-text" class="font-black text-lg uppercase"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="data-box">
+                                <label>Unidad</label>
+                                <p id="v-unidad-val" class="font-black text-sm uppercase"></p>
+                            </div>
+                            <div class="data-box">
+                                <label>Operador</label>
+                                <p id="v-chofer" class="font-black text-sm uppercase"></p>
+                            </div>
+                            <div class="data-box">
+                                <label>Placas</label>
+                                <p id="v-placas" class="font-black text-sm uppercase"></p>
+                            </div>
+                        </div>
+
+                        <div class="data-box">
+                            <label>Peticiones Especiales</label>
+                            <p id="v-peticion-val" class="text-sm font-bold text-slate-700 italic"></p>
+                        </div>
+
+                        <div class="flex justify-between items-center p-6 border-2 border-slate-100 rounded-2xl">
+                            <div>
+                                <h4 class="font-black text-xs uppercase text-slate-400">Total Pagado (Neto)</h4>
+                                <p id="v-monto-val" class="text-3xl font-black"></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] font-bold text-slate-500 uppercase">Estado de reserva</p>
+                                <p class="text-sm font-black text-emerald-600 uppercase tracking-widest">Confirmado</p>
+                            </div>
+                        </div>
+
+                        <!-- Politicas de Agencia -->
+                        <div class="policy-text">
+                            <p class="font-bold text-slate-900 mb-2 uppercase">Informacion Importante / Terms and Conditions:</p>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li><strong>Identificacion:</strong> Presentar este voucher digital o impreso al abordar.</li>
+                                <li><strong>Puntualidad:</strong> Espera maxima: 15 min en Hotel / 45 min en Aeropuerto tras aterrizaje.</li>
+                                <li><strong>Cancelaciones:</strong> Cambios permitidos con 24 horas de antelacion.</li>
+                                <li><strong>Equipaje:</strong> La agencia no se responsabiliza por objetos olvidados en la unidad.</li>
+                                <li><strong>Seguridad:</strong> Seguro de viajero valido unicamente dentro del vehiculo.</li>
+                            </ul>
+                        </div>
+
+                        <div class="pt-8 text-center border-t border-slate-50">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-300 italic">Gracias por elegir Transportation Global Logistics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="view-admin" class="hidden max-w-xl mx-auto mt-8 px-4">
+        <div id="admin-dashboard-view" class="space-y-4">
+            <div class="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100">
+                <span class="font-black uppercase text-xs text-slate-400">Panel Administrativo</span>
+                <span class="bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">En linea</span>
+            </div>
+            <div id="admin-list" class="space-y-3">
+                <p class="text-center py-10 text-slate-300 font-black uppercase text-sm">Sin solicitudes por autorizar</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let ordenes = [];
+        let currentOrder = null;
+        const LINK_MERCADO_PAGO = "https://mpago.la/17cBmpk";
+
+        window.switchTab = (tab) => {
+            const userView = document.getElementById('view-user');
+            const adminView = document.getElementById('view-admin');
+            const btnUser = document.getElementById('tab-btn-user');
+            const btnAdmin = document.getElementById('tab-btn-admin');
+            
+            if (tab === 'user') {
+                userView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                btnUser.classList.add('bg-sky-600', 'text-white');
+                btnAdmin.classList.remove('bg-sky-600', 'text-white');
+            } else {
+                userView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                btnAdmin.classList.add('bg-sky-600', 'text-white');
+                btnUser.classList.remove('bg-sky-600', 'text-white');
+                renderAdminList();
+            }
+        };
+
+        document.getElementById('transportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            const orderId = "TR-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+            const nuevaOrden = { ...data, id: Date.now().toString(), orderID: orderId, status: 'pendiente' };
+            ordenes.push(nuevaOrden);
+            currentOrder = nuevaOrden;
+            window.open(LINK_MERCADO_PAGO, '_blank');
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('waiting-panel').classList.remove('hidden');
+            document.getElementById('wait-order-id').innerText = orderId;
+        });
+
+        function renderAdminList() {
+            const listEl = document.getElementById('admin-list');
+            const pendientes = ordenes.filter(o => o.status === 'pendiente');
+            if (pendientes.length === 0) {
+                listEl.innerHTML = '<p class="text-center py-10 text-slate-300 font-black uppercase text-sm">Sin solicitudes por autorizar</p>';
+                return;
+            }
+            listEl.innerHTML = '';
+            pendientes.forEach(order => {
+                const div = document.createElement('div');
+                div.className = "bg-white border-2 border-slate-100 rounded-3xl p-6 flex justify-between items-center shadow-sm";
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-black text-sky-600 uppercase">${order.orderID}</span>
+                        <h4 class="font-black text-slate-900 uppercase text-lg leading-none">${order.nombre}</h4>
+                        <p class="text-[11px] text-slate-400 font-bold uppercase">${order.origen} a ${order.destino}</p>
+                        <p class="text-[10px] text-sky-500 font-black tracking-tight">$${order.balance} MXN</p>
+                    </div>
+                    <button onclick="aprobarOrden('${order.id}')" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase hover:bg-sky-600 transition-colors">Validar</button>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        window.aprobarOrden = (id) => {
+            const idx = ordenes.findIndex(o => o.id === id);
+            if (idx !== -1) {
+                ordenes[idx].status = 'aprobado';
+                renderAdminList();
+                if (currentOrder && currentOrder.id === id) mostrarVoucherFinal(ordenes[idx]);
+            }
+        };
+
+        function mostrarVoucherFinal(data) {
+            currentOrder = data;
+            document.getElementById('waiting-panel').classList.add('hidden');
+            document.getElementById('success-panel').classList.remove('hidden');
+            
+            document.getElementById('v-folio').innerText = data.orderID;
+            document.getElementById('v-nombre').innerText = data.nombre;
+            document.getElementById('v-pax-val').innerText = `${data.pax} Personas`;
+            document.getElementById('v-empresa-val').innerText = `Agencia: ${data.empresa}`;
+            document.getElementById('v-vuelo-val').innerText = data.vuelo || "Sin numero de vuelo";
+            document.getElementById('v-fecha').innerText = data.fecha.replace('T', ' ');
+            document.getElementById('v-origen-text').innerText = data.origen;
+            document.getElementById('v-destino-text').innerText = data.destino;
+            document.getElementById('v-unidad-val').innerText = `${data.tipo_unidad} (${data.color_unidad})`;
+            document.getElementById('v-chofer').innerText = data.conductor;
+            document.getElementById('v-placas').innerText = data.placas;
+            document.getElementById('v-peticion-val').innerText = data.peticion || "Ninguna";
+            document.getElementById('v-monto-val').innerText = "$" + data.balance + " MXN";
+        }
+
+        window.nuevaOrden = () => {
+            currentOrder = null;
+            document.getElementById('transportForm').reset();
+            document.getElementById('success-panel').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+            // Reset fecha a hoy
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('input-fecha').value = now.toISOString().slice(0, 16);
+        };
+
+        window.descargarPDF = () => {
+            const element = document.getElementById('voucher-printable');
+            html2pdf().set({ 
+                margin: 0, 
+                filename: `Voucher_${currentOrder.orderID}.pdf`, 
+                image: { type: 'jpeg', quality: 1.0 }, 
+                html2canvas: { scale: 3, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save();
+        };
+
+        window.compartirWhatsApp = () => {
+            const d = currentOrder;
+            const texto = `*TRANSPORTATION - VOUCHER: ${d.orderID}*%0A*Pax:* ${d.nombre} (${d.pax})%0A*Vuelo:* ${d.vuelo}%0A*Ruta:* ${d.origen} a ${d.destino}%0A*Total:* $${d.balance}%0A*Estatus:* VALIDADO`;
+            window.open(`https://wa.me/?text=${texto}`, '_blank');
+        };
+
+        window.onload = () => {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('input-fecha').value = now.toISOString().slice(0, 16);
+        };
+    </script>
+</body>
+</html>
